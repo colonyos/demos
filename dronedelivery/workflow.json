@@ -1,0 +1,23 @@
+[
+    {
+        "name": "approve_delivery",
+        "func": "approve",
+        "args": [
+            "Rutvik"
+        ],
+        "conditions": {
+            "runtimetype": "approver",
+            "dependencies": []
+        }
+    },
+    {
+        "name": "send_drone",
+        "func": "deliver",
+        "conditions": {
+            "runtimetype": "drone",
+            "dependencies": [
+                "approve_delivery"
+            ]
+        }
+    }
+]
