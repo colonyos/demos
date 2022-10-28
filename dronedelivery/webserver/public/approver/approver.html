@@ -1,125 +1,130 @@
 <html>
+
 <head>
-  <meta charset="utf-8">
+    <meta charset="utf-8">
 
-  <script src="../src/jquery-3.6.0.min.js"></script>
-  <script src="../src/crypto/wasm_exec.js"></script>
-  <script src="../src/crypto/crypto.js"></script>
-  <script src="../src/colonyruntime.js"></script>
+    <script src="../src/jquery-3.6.0.min.js"></script>
+    <script src="../src/crypto/wasm_exec.js"></script>
+    <script src="../src/crypto/crypto.js"></script>
+    <script src="../src/colonyruntime.js"></script>
 
-  <style>
-    .approve {
-        display: block;
-        width: 100%;
-        border: none;
-        background-color: #04AA6D;
-        color: white;
-        padding: 14px 28px;
-        font-size: 16px;
-        cursor: pointer;
-        text-align: center;
-    }
-    
-    .reject {
-        display: block;
-        width: 100%;
-        border: none;
-        background-color: red;
-        color: white;
-        padding: 14px 28px;
-        font-size: 16px;
-        cursor: pointer;
-        text-align: center;
-    }
+    <style>
+        .approve {
+            display: block;
+            width: 100%;
+            border: none;
+            background-color: #04AA6D;
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
 
-    .approve:hover {
-        background-color: green;
-        color: black;
-    }
-    .reject:hover {
-        background-color: #8b0000;
-        color: black;
-    }
-    
-    .approvalpanel {
-        border: border:2px solid black; 
-        border-style: dashed;
-        padding: 10px;
-        margin: 10px;
-    }
-    
-    .missiontext {
-        font-size: 18px;
-    }
-</style>
+        .reject {
+            display: block;
+            width: 100%;
+            border: none;
+            background-color: red;
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .approve:hover {
+            background-color: green;
+            color: black;
+        }
+
+        .reject:hover {
+            background-color: #8b0000;
+            color: black;
+        }
+
+        .approvalpanel {
+            border: border:2px solid black;
+            border-style: dashed;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        .missiontext {
+            font-size: 18px;
+        }
+    </style>
 </head>
 
 <body>
-  <center><h1><span id="destination"></span></h1></center>
-  <h1>Drone missions approvals</h1>
-  <div id="approvals"></div>
-  <div id="history"></div>
-  <script>
-     let colonyId = "4787a5071856a4acf702b2ffcea422e3237a679c681314113d86139461290cf4"
-     let runtimeid = "7217f1e2c90b495fd98387088ff3c8eea8484c862cbcc7fabf739dc4da629608"
-     let runtime_prvkey = "a4210d6bc4991f4ba6365c4fb3ae8a8ce347eead477caad6160bf65d99812371"
-     let runtime = new ColonyRuntime("rocinante", "50080")
-     let working = false
-     
-     function approve(processid) {
-         console.log("approve " + processid)
-         runtime.closeProcess(processid, true, runtime_prvkey)
-         .then(() => {
-             showOldProcesses()
-         })
-         $("#" + processid).remove();
-     }
-     
-     function reject(processid) {
-         console.log("reject " + processid)
-         runtime.closeProcess(processid, false, runtime_prvkey)
-         $("#" + processid).remove();
-     }
+    <center>
+        <h1><span id="destination"></span></h1>
+    </center>
+    <h1>Drone missions approvals</h1>
+    <div id="approvals"></div>
+    <div id="history"></div>
+    <script>
+        let colonyId = "4787a5071856a4acf702b2ffcea422e3237a679c681314113d86139461290cf4"
+        let runtimeid = "7217f1e2c90b495fd98387088ff3c8eea8484c862cbcc7fabf739dc4da629608"
+        let runtime_prvkey = "a4210d6bc4991f4ba6365c4fb3ae8a8ce347eead477caad6160bf65d99812371"
+        let runtime = new ColonyRuntime("localhost", "50080")
+        let working = false
 
-     function addApproveDiv(mission, processid, workflowId) {
-         $("#approvals").append("<div class='approvalpanel' id='" + processid + "'><span class='missiontext'><b>WorkflowId:</b><br>" + workflowId + "<br><b>ProcessId:</b><br>" + processid + "</span> <span class='missiontext'><br><b>Args:</b><br>" + mission + "</span><button class='approve' onclick='approve(\"" + processid + "\")' id='approve_" + processid + "'>Approve</button><div>&nbsp;</div><button class='reject' id='reject_" + processid + "' onclick='reject(\"" + processid + "\")'>Reject</button></div>");
-     }
-     
-      function addHistoryDiv(mission, processid, workflowId, time, func) {
-                $("#history").append("<div class='approvalpanel' id='" + processid + "'><span class='missiontext'><b>WorkflowId:</b><br>" + workflowId + "<br><b>ProcessId:</b><br>" + processid + "<br><b>Time</b>:<br>" + time + "<br><b>Func:</b>:<br>" + func + "</span> <span class='missiontext'><br><b>Args:</b><br>" + mission + "</span></div>");
-     }
-      
-      function showOldProcesses() {
-          runtime.getProcesses(colonyId, 10, Success, runtime_prvkey)
-          .then((processes) => {
-              $("#history").empty();
-              for (let i=0;i<processes.length;i++) {
-                   addHistoryDiv(processes[i].spec.args, processes[i].processid, processes[i].processgraphid, processes[i].starttime, processes[i].spec.func)
-              } 
-          })
-      } 
-    
-      function assign() {
-          runtime.assign(colonyId, 100, runtime_prvkey) // The server will hang the connection for max 10 seconds 
-          .then((process) => {
-              if (process.spec.func == "approve") {
-                  console.log("assigned: got a process")
-                  console.log("approver func called")
-                  addApproveDiv(process.spec.args[0], process.processid, process.processgraphid)
-                  assign()
-              }
-          })
-          .catch((err) => {
-              assign()
-          })
-      }
+        function approve(processid) {
+            console.log("approve " + processid)
+            runtime.closeProcess(processid, true, runtime_prvkey)
+                .then(() => {
+                    showOldProcesses()
+                })
+            $("#" + processid).remove();
+        }
 
-      $(function() {
-           runtime.load().then(() => {
-               showOldProcesses()
-               assign()
-           })
-      })
-  </script>
+        function reject(processid) {
+            console.log("reject " + processid)
+            runtime.closeProcess(processid, false, runtime_prvkey)
+            $("#" + processid).remove();
+        }
+
+        function addApproveDiv(mission, processid, workflowId) {
+            $("#approvals").append("<div class='approvalpanel' id='" + processid + "'><span class='missiontext'><b>WorkflowId:</b><br>" + workflowId + "<br><b>ProcessId:</b><br>" + processid + "</span> <span class='missiontext'><br><b>Args:</b><br>" + mission + "</span><button class='approve' onclick='approve(\"" + processid + "\")' id='approve_" + processid + "'>Approve</button><div>&nbsp;</div><button class='reject' id='reject_" + processid + "' onclick='reject(\"" + processid + "\")'>Reject</button></div>");
+        }
+
+        function addHistoryDiv(mission, processid, workflowId, time, func) {
+            $("#history").append("<div class='approvalpanel' id='" + processid + "'><span class='missiontext'><b>WorkflowId:</b><br>" + workflowId + "<br><b>ProcessId:</b><br>" + processid + "<br><b>Time</b>:<br>" + time + "<br><b>Func:</b>:<br>" + func + "</span> <span class='missiontext'><br><b>Args:</b><br>" + mission + "</span></div>");
+        }
+
+        function showOldProcesses() {
+            runtime.getProcesses(colonyId, 10, Success, runtime_prvkey)
+                .then((processes) => {
+                    $("#history").empty();
+                    for (let i = 0; i < processes.length; i++) {
+                        addHistoryDiv(processes[i].spec.args, processes[i].processid, processes[i].processgraphid, processes[i].starttime, processes[i].spec.func)
+                    }
+                })
+        }
+
+        function assign() {
+            runtime.assign(colonyId, 100, runtime_prvkey) // The server will hang the connection for max 10 seconds 
+                .then((process) => {
+                    if (process.spec.func == "approve") {
+                        console.log("assigned: got a process")
+                        console.log("approver func called")
+                        addApproveDiv(process.spec.args[0], process.processid, process.processgraphid)
+                        assign()
+                    }
+                })
+                .catch((err) => {
+                    assign()
+                })
+        }
+
+        $(function () {
+            runtime.load().then(() => {
+                showOldProcesses()
+                assign()
+            })
+        })
+    </script>
 </body>
+
 </html>
