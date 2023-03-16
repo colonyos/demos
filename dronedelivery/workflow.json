@@ -1,20 +1,20 @@
 [
     {
-        "name": "approve_delivery",
-        "func": "approve",
+        "nodename": "approve_delivery",
+        "funcname": "approve",
         "args": [
-            "Rutvik 18"
+            "lulea"
         ],
         "conditions": {
-            "runtimetype": "approver",
+            "executortype": "approver",
             "dependencies": []
         }
     },
     {
-        "name": "send_drone",
-        "func": "deliver",
+        "nodename": "send_drone",
+        "funcname": "deliver",
         "conditions": {
-            "runtimetype": "drone",
+            "executortype": "drone",
             "dependencies": [
                 "approve_delivery"
             ]

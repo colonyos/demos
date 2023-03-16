@@ -6,7 +6,7 @@
     <script src="../src/jquery-3.6.0.min.js"></script>
     <script src="../src/crypto/wasm_exec.js"></script>
     <script src="../src/crypto/crypto.js"></script>
-    <script src="../src/colonyruntime.js"></script>
+    <script src="../src/colonies.js"></script>
 
     <style>
         .approve {
@@ -65,23 +65,23 @@
     <div id="history"></div>
     <script>
         let colonyId = "4787a5071856a4acf702b2ffcea422e3237a679c681314113d86139461290cf4"
-        let runtimeid = "7217f1e2c90b495fd98387088ff3c8eea8484c862cbcc7fabf739dc4da629608"
-        let runtime_prvkey = "a4210d6bc4991f4ba6365c4fb3ae8a8ce347eead477caad6160bf65d99812371"
-        let runtime = new ColonyRuntime("localhost", "50080")
+        let executorid = "7217f1e2c90b495fd98387088ff3c8eea8484c862cbcc7fabf739dc4da629608"
+        let executor_prvkey = "a4210d6bc4991f4ba6365c4fb3ae8a8ce347eead477caad6160bf65d99812371"
+        let colonies = new Colonies("localhost", "50080")
         let working = false
 
         function approve(processid) {
             console.log("approve " + processid)
-            runtime.closeProcess(processid, true, runtime_prvkey)
+            colonies.close(processid, executor_prvkey)
                 .then(() => {
-                    showOldProcesses()
+                    //showOldProcesses()
                 })
             $("#" + processid).remove();
         }
 
         function reject(processid) {
             console.log("reject " + processid)
-            runtime.closeProcess(processid, false, runtime_prvkey)
+            coloniees.fail(processid, executor_prvkey)
             $("#" + processid).remove();
         }
 
@@ -94,7 +94,7 @@
         }
 
         function showOldProcesses() {
-            runtime.getProcesses(colonyId, 10, Success, runtime_prvkey)
+            colonies.getProcesses(colonyId, 10, Success, executor_prvkey)
                 .then((processes) => {
                     $("#history").empty();
                     for (let i = 0; i < processes.length; i++) {
@@ -104,9 +104,9 @@
         }
 
         function assign() {
-            runtime.assign(colonyId, 100, runtime_prvkey) // The server will hang the connection for max 10 seconds 
+            colonies.assign(colonyId, 100, executor_prvkey) // The server will hang the connection for max 10 seconds 
                 .then((process) => {
-                    if (process.spec.func == "approve") {
+                    if (process.spec.funcname == "approve") {
                         console.log("assigned: got a process")
                         console.log("approver func called")
                         addApproveDiv(process.spec.args[0], process.processid, process.processgraphid)
@@ -119,8 +119,8 @@
         }
 
         $(function () {
-            runtime.load().then(() => {
-                showOldProcesses()
+            colonies.load().then(() => {
+                //showOldProcesses()
                 assign()
             })
         })

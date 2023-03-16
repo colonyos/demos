@@ -2,10 +2,10 @@
 
 # Register a drone
 colonies keychain add --id b054e621ff726dbe83055facf3a1d95cef5be44c4df4cc97b040b6d74f2d8c95 --prvkey 4f26ffcaa5707438ec87257c264736b170e5b81746aea10d6b069038aa76ada7
-colonies runtime register --spec ./drone.json --runtimeprvkey 4f26ffcaa5707438ec87257c264736b170e5b81746aea10d6b069038aa76ada7
-colonies runtime approve --runtimeid b054e621ff726dbe83055facf3a1d95cef5be44c4df4cc97b040b6d74f2d8c95  
+colonies executor add --spec ./drone_executor.json --executorprvkey 4f26ffcaa5707438ec87257c264736b170e5b81746aea10d6b069038aa76ada7
+colonies executor approve --executorid b054e621ff726dbe83055facf3a1d95cef5be44c4df4cc97b040b6d74f2d8c95  
 
 # Register an approver 
 colonies keychain add --id 7217f1e2c90b495fd98387088ff3c8eea8484c862cbcc7fabf739dc4da629608 --prvkey a4210d6bc4991f4ba6365c4fb3ae8a8ce347eead477caad6160bf65d99812371
-colonies runtime register --spec ./approver.json --runtimeprvkey a4210d6bc4991f4ba6365c4fb3ae8a8ce347eead477caad6160bf65d99812371
-colonies runtime approve --runtimeid 7217f1e2c90b495fd98387088ff3c8eea8484c862cbcc7fabf739dc4da629608
+colonies executor add --spec ./approver_executor.json --executorprvkey a4210d6bc4991f4ba6365c4fb3ae8a8ce347eead477caad6160bf65d99812371
+colonies executor approve --executorid 7217f1e2c90b495fd98387088ff3c8eea8484c862cbcc7fabf739dc4da629608

@@ -1,9 +1,11 @@
 # Demo guide
 
 ## Dispatch a drone to deliver a packet
-colonies process submit --spec deliver_process.json 
-colonies process run --func deliver --args "Humlevagen 18" --targettype drone 
+colonies function submit --spec deliver_process.json 
+colonies function exec --func deliver --args "lulea" --targettype drone 
 
-## Start Drone
-Just open webpage below
-http://rocinante:1111/drone/drone.html
+## Instructions
+cd server
+./start_server.sh
+http://localhost:1111/drone/drone.html
+http://approver:1111/approver/approver.html

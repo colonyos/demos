@@ -6,7 +6,7 @@
     <script src="../src/jquery-3.6.0.min.js"></script>
     <script src="../src/crypto/wasm_exec.js"></script>
     <script src="../src/crypto/crypto.js"></script>
-    <script src="../src/colonyruntime.js"></script>
+    <script src="../src/colonies.js"></script>
 
     <style>
         .droneimage {
@@ -119,73 +119,75 @@
         $(function () {
             let colonyid = "4787a5071856a4acf702b2ffcea422e3237a679c681314113d86139461290cf4"
             let colonyPrvKey = "ba949fa134981372d6da62b6a56f336ab4d843b22c02a4257dcf7d0d73097514"
-            let runtimeid = "b054e621ff726dbe83055facf3a1d95cef5be44c4df4cc97b040b6d74f2d8c95"
-            let runtime_prvkey = "4f26ffcaa5707438ec87257c264736b170e5b81746aea10d6b069038aa76ada7"
-            let runtime = new ColonyRuntime("localhost", "50080")
+            let executorid = "b054e621ff726dbe83055facf3a1d95cef5be44c4df4cc97b040b6d74f2d8c95"
+            let executor_prvkey = "4f26ffcaa5707438ec87257c264736b170e5b81746aea10d6b069038aa76ada7"
+            let colonies = new Colonies("localhost", "50080")
             let working = false
             let crypto = new Crypto()
 
-            function registerDroneRuntime(name) {
-                let runtimePrvKey = runtime.crypto.prvkey()
-                let runtimeId = runtime.crypto.id(runtimePrvKey)
+            function registerDroneExecutor(name) {
+                let executorPrvKey = colonies.crypto.prvkey()
+                let executorId = colonies.crypto.id(executorPrvKey)
                 let promise = new Promise(function (resolve, reject) {
-                    droneRuntime = {
-                        "runtimeid": runtimeId,
-                        "runtimetype": "drone",
-                        "name": name + runtimeId,
+                    droneExecutor = {
+                        "executorid": executorId,
+                        "executortype": "drone",
+                        "executorname": name + executorId,
                         "colonyid": colonyid,
                         "state": 0
                     }
 
-                    runtime.addRuntime(droneRuntime, colonyPrvKey)
-                        .then((droneRuntime) => {
-                            console.log("added runtime", runtime)
-                            return runtime.approveRuntime(droneRuntime.runtimeid, colonyPrvKey)
+                    colonies.addExecutor(droneExecutor, colonyPrvKey)
+                        .then((droneExecutor) => {
+                            console.log("added executor", droneExecutor)
+                            return colonies.approveExecutor(droneExecutor.executorid, colonyPrvKey)
                         })
-                        .then((droneRuntime) => {
-                            console.log("runtime now approved")
-                            console.log(runtimePrvKey)
-                            resolve(runtimePrvKey)
+                        .then((droneExecutor) => {
+                            console.log("executor now approved")
+                            console.log(executorPrvKey)
+                            resolve(executorPrvKey)
                         })
                 })
 
                 return promise
             }
 
-            function assign(name, runtimePrvKey) {
+            function assign(name, executorPrvKey) {
                 console.log("setting up assign:", name)
-                runtime.assign(colonyid, 1, runtimePrvKey) // The server will hang the connection for max 100 seconds 
+                colonies.assign(colonyid, 100, executorPrvKey) // The server will hang the connection for max 100 seconds 
                     .then((process) => {
-                        if (process.spec.func == "deliver") {
-                            runtime.getProcess(process.parents[0], runtimePrvKey)
+                        console.log(process)
+                        if (process.spec.funcname == "deliver") {
+                            colonies.getProcess(process.parents[0], executorPrvKey)
                                 .then((parentProcess) => {
+                                    console.log(parentProcess)
                                     $("#" + name).attr("src", "./drone_deliver.png");
                                     $("#" + name + "-mission").text("Mission: " + parentProcess.spec.args[0]);
                                     setTimeout(function () {
                                         $("#" + name).attr("src", "./drone_waiting.png");
                                         $("#" + name + "-mission").text("");
-                                        runtime.closeProcess(process.processid, true, runtimePrvKey)
-                                        assign(name, runtimePrvKey)
+                                        colonies.close(process.processid, executorPrvKey)
+                                        assign(name, executorPrvKey)
                                     }, 5000);
                                 })
                         } else {
                             console.log("invalid function name")
-                            assign(name, runtimePrvKey)
+                            assign(name, executorPrvKey)
                         }
                     })
                     .catch((err) => {
-                        console.log("ERROR: ", err)
-                        assign(name, runtimePrvKey)
+                        //console.log("ERROR: ", err)
+                        assign(name, executorPrvKey)
                     })
             }
 
-            runtime.load()
+            colonies.load()
                 .then(() => {
                     for (let i = 1; i < 10; i++) {
                         let name = "drone" + i.toString()
-                        registerDroneRuntime(name)
-                            .then((runtimePrvKey) => {
-                                assign(name, runtimePrvKey)
+                        registerDroneExecutor(name)
+                            .then((executorPrvKey) => {
+                                assign(name, executorPrvKey)
                             })
                     }
                 })
