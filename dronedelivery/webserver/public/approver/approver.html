@@ -74,7 +74,7 @@
             console.log("approve " + processid)
             colonies.close(processid, executor_prvkey)
                 .then(() => {
-                    //showOldProcesses()
+                    showOldProcesses()
                 })
             $("#" + processid).remove();
         }

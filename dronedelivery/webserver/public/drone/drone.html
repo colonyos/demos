@@ -183,7 +183,7 @@
 
             colonies.load()
                 .then(() => {
-                    for (let i = 1; i < 10; i++) {
+                    for (let i = 1; i < 2; i++) {
                         let name = "drone" + i.toString()
                         registerDroneExecutor(name)
                             .then((executorPrvKey) => {

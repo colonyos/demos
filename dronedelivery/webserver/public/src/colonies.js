@@ -185,6 +185,7 @@ class Colonies {
     }
 
     close(processId, prvkey) {
+        console.log("closing process:" + processId)
         var msg = {
             "msgtype": "closesuccessfulmsg",
             "processid": processId
